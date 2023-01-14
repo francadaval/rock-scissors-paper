@@ -1,5 +1,5 @@
 import { getLogger, Logger } from "log4js"
-import { UserSessionRepository } from "../repository/user-session.repossitory"
+import { UserSessionRepository } from "../repository/user-session.repository"
 import { UserRepository } from "../repository/user.repository"
 import { ConnectionContext } from "../websockets/connection-context"
 import { MessageHandler } from "../websockets/message-handler"
