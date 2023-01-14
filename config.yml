@@ -1,0 +1,6 @@
+log:
+  files_path: "./logs/"
+  level: "trace"
+
+web:
+  port: 3000
