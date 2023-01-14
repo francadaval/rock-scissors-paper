@@ -1,0 +1,30 @@
+<mat-card>
+	<mat-card-header>
+		<div mat-card-avatar>
+			<mat-icon color="primary">home</mat-icon>
+		</div>
+		<mat-card-title>Iniciar sesión</mat-card-title>
+		<mat-card-subtitle>Introduce nombre de usuario y contraseña</mat-card-subtitle>
+	</mat-card-header>
+	<mat-divider></mat-divider>
+	<mat-card-content>
+		<form [formGroup]="loginFormGroup">
+			<div>
+				<mat-form-field>
+					<mat-label>Usuario</mat-label>
+					<input matInput placeholder="nombre de usuario" formControlName="username" required>
+				</mat-form-field>
+			</div>
+			<div>
+				<mat-form-field>
+					<mat-label>Contraseña</mat-label>
+					<input matInput placeholder="contraseña" type="password" formControlName="password" required>
+				</mat-form-field>
+			</div>	
+		</form>
+	</mat-card-content>
+	<mat-divider></mat-divider>
+	<mat-card-actions>
+		<button [disabled]="disabledLogin" (click)="login()" mat-raised-button color="primary">login</button>
+	</mat-card-actions>
+</mat-card>
