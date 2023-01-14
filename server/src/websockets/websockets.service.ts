@@ -1,24 +1,21 @@
 import * as http from 'http';
 import { getLogger, Logger } from 'log4js'
-import WebSocket = require('ws')
-
-interface MessageHandler {
-	handleMessage(message: Message, connectionContext: any): void;
-	acceptType(type: string): boolean;
-}
+import { RawData, Server, WebSocket } from 'ws';
+import { ConnectionContext } from './connection-context';
+import { MessageHandler } from './message-handler';
 
 export class WebSocketsService {
 
 	protected logger: Logger = getLogger("WebSocketsServer");
 
-	protected wss: WebSocket.Server;
+	protected wss: Server;
 
 	protected messageHandlers: MessageHandler[] = [];
 
 	public constructor(port: number) {
 		this.logger.info("Trying to start server on port " + port);
 
-		this.wss = new WebSocket.Server({port});
+		this.wss = new Server({port});
 
 		this.wss.on('listening', () => {
 			this.logger.info("Server listening on port " + port);
@@ -50,7 +47,10 @@ export class WebSocketsService {
 			}
 		})
 
-		let connectionContext = {};
+		let connectionContext: ConnectionContext = {
+			ws: ws,
+			ip: request.socket.remoteAddress
+		};
 
 		ws.on('message', async rawMessage => {
 			this.logger.trace('Received message: ' + rawMessage);
@@ -64,7 +64,7 @@ export class WebSocketsService {
 		})
 	}
 
-	private parseMessage(rawMessage: WebSocket.RawData): Message {
+	private parseMessage(rawMessage: RawData): Message {
 		let msg: string;
 
 		if(Array.isArray(rawMessage)) {
