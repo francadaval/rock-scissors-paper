@@ -1,5 +1,5 @@
 import { WebSocket } from "ws";
-import { UserSession } from "../session/user-session";
+import { UserSession } from "../entities/user-session";
 
 export interface ConnectionContext {
 	ws: WebSocket;

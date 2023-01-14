@@ -79,11 +79,11 @@ export class WebSocketsService {
 		return JSON.parse(msg);
 	}
 
-	protected sendMessage( ws: WebSocket, message: Message ) {
+	public sendMessage( ws: WebSocket, message: Message ) {
 		this.send( ws, message );
 	}
 
-	protected sendErrorMessage( ws: WebSocket, errorMessage: ErrorMessage ) {
+	public sendErrorMessage( ws: WebSocket, errorMessage: ErrorMessage ) {
 		this.send( ws, errorMessage );
 	}
 
