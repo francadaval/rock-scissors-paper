@@ -3,7 +3,7 @@ import { UserSessionRepository } from "../user-session.repository";
 
 const USER_SESSIONS: {[id:string]: UserSession} = {};
 
-export class DummyUserSessionRepository implements UserSessionRepository {
+export class DummyUserSessionRepositoryImpl implements UserSessionRepository {
     async save(session: UserSession) {
         USER_SESSIONS[session._id] = session;
     };
