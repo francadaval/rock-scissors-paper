@@ -36,6 +36,10 @@ export class RoomsService implements MessageHandler {
         }
     }
 
+    async listRooms(messageContent: any, username: string) {
+        this.sendRoomsList(username);
+    }
+
     async createRoom(messageContent: any, username: string) {
         let room: Room = {
             _id: crypto.randomUUID(),
@@ -76,6 +80,19 @@ export class RoomsService implements MessageHandler {
 
         this.sendUserRoomMsg(room);
         this.sendFreeRoomsMsg();
+    }
+
+    protected async sendRoomsList(username: string) {
+        let free_rooms = await this.roomsRepository.findFreeRooms();
+        let user_rooms = await this.roomsRepository.findByUsername(username);
+
+        this.broadcaster.sendUserMessage(username, {
+            type: ROOMS_TYPE,
+            content: {
+                free_rooms,
+                user_rooms
+            }
+        });
     }
 
     protected async sendUserRoomMsg(room: Room) {
