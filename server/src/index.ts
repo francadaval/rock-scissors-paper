@@ -6,6 +6,8 @@ import { WebSocketsService } from './websockets/websockets.service'
 import { SessionManagerService } from './session/sessions-manager.service';
 import { DummyUserRepositoryImpl } from './repository/dummy/dummy-user.repository-impl';
 import { DummyUserSessionRepositoryImpl } from './repository/dummy/dummy-user-session.repository-impl';
+import { RoomsService } from './game/rooms.service';
+import { DummyRoomsRepositoryImpl } from './repository/dummy/dummy-rooms.repository-impl';
 
 loadConfigFile( 'config.yml' );
 
@@ -26,3 +28,9 @@ let sessionManagerService = new SessionManagerService(
 	new DummyUserSessionRepositoryImpl(),
 	webSocketServer
 );
+
+let roomsService = new RoomsService(
+	new DummyRoomsRepositoryImpl(),
+	webSocketServer,
+	sessionManagerService
+)
