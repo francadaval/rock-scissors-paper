@@ -8,10 +8,11 @@ import { WebSocket } from 'ws';
 import { UserSession } from "../entities/user-session"
 
 import crypto = require('crypto')
+import { Broadcaster } from "../websockets/broadcaster"
 
 export const USER_SESSION_MESSAGE_TYPE = "user-session";
 
-export class SessionManagerService implements MessageHandler {
+export class SessionManagerService implements MessageHandler, Broadcaster {
 
     protected userRepository: UserRepository;
     protected userSessionRepository: UserSessionRepository;
@@ -60,6 +61,26 @@ export class SessionManagerService implements MessageHandler {
                 return;
         }
     }
+
+    public sendUserMessage(username: string, message: Message): void {
+        Object.values(this.sessions).find(session => session.username == username).sendMessage(message);
+    }
+    
+    public sendUserErrorMessage(username: string, message: ErrorMessage): void {
+        Object.values(this.sessions).find(session => session.username == username).sendError(message);
+    }
+    
+	public broadcastMessage( message: Message ): void {
+		for( let session of Object.values( this.sessions ) ) {
+			session.sendMessage( message );
+		}
+	}
+
+	public broadcastError( message: ErrorMessage ): void {
+		for( let session of Object.values( this.sessions ) ) {
+			session.sendError( message );
+		}
+	}
 
     protected sendSessionResponse(connectionContext: ConnectionContext, command: string) {
         if(connectionContext.session) {
