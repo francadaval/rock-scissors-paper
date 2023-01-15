@@ -12,6 +12,7 @@ export interface UserSession {
 const SESSION_ID = 'sessionId';
 const USER_SESSION_MESSAGE_TYPE = "user-session";
 const LOGIN_COMMAND = "login";
+const CONTINUE_SESSION_COMMAND = "continue_session";
 
 @Injectable({
 	providedIn: 'root'
@@ -22,6 +23,8 @@ export class SessionService {
 		console.log( "Constructor SessionService" )
 
 		this.sessionObservable = wsService.connectToResponseType(USER_SESSION_MESSAGE_TYPE);
+
+		this.checkUserSession();
 	}
 
 	protected _userSession: UserSession;
@@ -41,19 +44,20 @@ export class SessionService {
 		if( !this.$userSession ) {
 			this.$userSession = new Promise( (resolve,reject) => {
 				let loginSubscription = this.sessionObservable
-					.pipe(filter( response => response.content.command == LOGIN_COMMAND ))
-					.subscribe( response => {
-						console.log( "Login response: " + JSON.stringify(response) )
-						if( !response.error && response.content.username == username ) {
-							this.setUser( response.content );
+					.pipe(filter( message => message.content.command == LOGIN_COMMAND ))
+					.subscribe( message => {
+						console.log( "Login response: " + JSON.stringify(message) )
+						if( !message.error && message.content.username == username ) {
+							this.setUserSession( message.content );
 							resolve( this.userSession )
 						} else {
-							this.setUser( null );
-							reject( response )
+							this.setUserSession( null );
+							reject( message )
 						}
 						loginSubscription.unsubscribe();
-					})			
+					});		
 
+				console.log( "Login user" )
 				this.wsService.send({
 					type: USER_SESSION_MESSAGE_TYPE,
 					content: {
@@ -70,7 +74,43 @@ export class SessionService {
 		}
 	}
 
-	protected setUser( userSession: UserSession ) {
+	protected checkUserSession(): Promise<UserSession> {
+		let sessionId = localStorage.getItem( SESSION_ID )
+		if( !this.$userSession && sessionId ) {
+			this.$userSession = new Promise( (resolve,reject) => {
+				
+				let sessionSubscription = this.sessionObservable
+					.pipe(filter( message => message.content.command == CONTINUE_SESSION_COMMAND ))
+					.subscribe( message => {
+						console.log( "Continue session response: " + JSON.stringify(message) )
+						if( !message.error ) {
+							this.setUserSession( message.content );
+							resolve( this.userSession )
+						} else {
+							this.setUserSession( null );
+							reject( message )
+						}
+						sessionSubscription.unsubscribe();
+					});		
+
+				console.log( "Ask to continue session" )
+				this.wsService.send({
+					type: USER_SESSION_MESSAGE_TYPE,
+					content: {
+						command: CONTINUE_SESSION_COMMAND,
+						session_id: sessionId
+					}
+				})
+			})
+
+			return this.$userSession
+		} else {
+			console.log( this.$userSession ? "Ya existe $user" : ( !sessionId ? "No hay session previa" : "???" ) )
+			return Promise.reject()
+		}
+	}
+
+	protected setUserSession( userSession: UserSession ) {
 		if( userSession )
 			localStorage.setItem( SESSION_ID, userSession.id );
 		else
