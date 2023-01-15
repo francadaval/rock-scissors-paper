@@ -36,22 +36,37 @@ export class SessionManagerService implements MessageHandler {
 
     async handleMessage(message: Message, connectionContext: ConnectionContext) {
         let content = message.content;
+        let session: UserSession = null;
 
         switch( message.content.command ) {
             case 'login':
                 this.logger.trace( 'Received login message from user: ' + content.username )
-                connectionContext.session = await this.login( content.username, content.password, connectionContext )
+                session = await this.login( content.username, content.password, connectionContext )
                 break;
             case 'continue_session':
                 this.logger.trace( 'Received continue_session message from user: ' + content.username )
-                connectionContext.session = await this.continue( content.session_id, connectionContext.ip )
+                session = await this.continue( content.session_id, connectionContext.ip )
                 break;
             case 'logout':
                 this.logger.trace( 'Received logout message from user: ' + content.username )
                 await this.logout(content.session_id);
                 connectionContext.session = null;
+                break;
             default:
                 this.logger.error('Unknown message of type "user-session".')
+                return;
+        }
+
+        connectionContext.session = session;
+        if(session) {
+            this.linkSession(session, connectionContext.ws);
+            session.sendMessage({
+                type: USER_SESSION_MESSAGE_TYPE,
+                content: {
+                    username: session.username,
+                    id: session._id
+                }
+            })
         }
     }
 
@@ -96,8 +111,6 @@ export class SessionManagerService implements MessageHandler {
 
 		this.userSessionRepository.save(session);
 		this.sessions[session._id] = session
-
-        this.linkSession(session, connectionContext.ws);
 
 		return session;
 	}

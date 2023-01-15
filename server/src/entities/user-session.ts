@@ -4,7 +4,7 @@ export interface UserSession {
 	name: string,
 	ip: string,
 	time: Date,
-	sendMessage?: ( data: object, type: string ) => void,
-	sendError?: ( data: object, type: string ) => void,
+	sendMessage?: ( message: Message ) => void,
+	sendError?: ( errorMessage: ErrorMessage ) => void,
 	terminate?: () => void
 }
