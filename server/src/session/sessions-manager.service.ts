@@ -60,14 +60,16 @@ export class SessionManagerService implements MessageHandler {
         connectionContext.session = session;
         if(session) {
             this.linkSession(session, connectionContext.ws);
-            session.sendMessage({
-                type: USER_SESSION_MESSAGE_TYPE,
-                content: {
-                    username: session.username,
-                    id: session._id
-                }
-            })
         }
+
+        this.websocketsService.sendMessage(connectionContext.ws, {
+            type: USER_SESSION_MESSAGE_TYPE,
+            content: {
+                command: message.content.command,
+                username: session.username,
+                id: session._id
+            }
+        })
     }
 
     protected async login(username: any, password: any, connectionContext: ConnectionContext): Promise<UserSession> {
