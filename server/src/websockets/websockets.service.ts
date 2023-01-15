@@ -1,4 +1,4 @@
-import * as http from 'http';
+import { IncomingMessage } from 'http';
 import { getLogger, Logger } from 'log4js'
 import { RawData, Server, WebSocket } from 'ws';
 import { ConnectionContext } from './connection-context';
@@ -21,7 +21,7 @@ export class WebSocketsService {
 			this.logger.info("Server listening on port " + port);
 		})
 
-		this.wss.on('connection', (wss,ws,request) => this.initConnection(ws,request) );
+		this.wss.on('connection', (ws: WebSocket, request: IncomingMessage) => this.initConnection(ws,request) );
 		
 		// TODO: this.wss.on('close', ... );
 		// TODO: this.wss.on('error', ... );
@@ -38,7 +38,7 @@ export class WebSocketsService {
 	// 	...
 	// }
 
-	protected async initConnection( ws: WebSocket, request: http.IncomingMessage ) {
+	protected async initConnection( ws: WebSocket, request: IncomingMessage ) {
 		this.logger.info( "Incoming connection from " + request.socket.remoteAddress + "." )
 		this.sendMessage( ws, {
 			type: "comm",
