@@ -7,6 +7,8 @@ import { WebSocketsService } from "../websockets/websockets.service"
 import { WebSocket } from 'ws';
 import { UserSession } from "../entities/user-session"
 
+import crypto = require('crypto')
+
 export const USER_SESSION_MESSAGE_TYPE = "user-session";
 
 export class SessionManagerService implements MessageHandler {
