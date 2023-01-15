@@ -1,3 +1,4 @@
+import { getLogger, Logger } from "log4js";
 import { Room } from "../entities/room.entity";
 import { RoomsRepository } from "../repository/rooms.repository";
 import { Broadcaster } from "../websockets/broadcaster";
@@ -29,10 +30,16 @@ export class RoomsService implements MessageHandler {
     protected websocketsService: WebSocketsService;
     protected broadcaster: Broadcaster;
 
+    protected logger: Logger = getLogger("RoomsService");
+
     async handleMessage(message: Message, connectionContext: ConnectionContext) {
         if (message.type == ROOMS_TYPE) {
             let command = message.content.command;
-            return this[command] ? this[command](message.content, connectionContext.session.username) : null;
+            let username = connectionContext.session.username;
+
+            this.logger.trace("Command " + command + " from " + username);
+
+            return (username && this[command]) ? this[command](message.content, connectionContext.session.username) : null;
         }
     }
 
