@@ -1,0 +1,7 @@
+import { User } from "./user.entity";
+
+export interface Room {
+    _id: string;
+    users: string[];
+    name: string;
+}
