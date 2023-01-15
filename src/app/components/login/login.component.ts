@@ -28,8 +28,8 @@ export class LoginComponent implements OnInit {
 	}
 
 	ngOnInit(): void {
-		this.sessionService.user.then( (user) => {
-			if( user ) {
+		this.sessionService.userSession.then( (userSession) => {
+			if( userSession ) {
 				console.log( "User on login screen, redirecting..." )
 				this.router.navigate(['/'])
 			} else console.log( "No user on login screen." );

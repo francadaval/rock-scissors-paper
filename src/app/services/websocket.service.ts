@@ -4,6 +4,13 @@ import { map, filter } from 'rxjs/operators';
 
 const URL = "ws://localhost:3001";
 
+export interface Message {
+    type: string;
+    content: any;
+    error_code?: number;
+    error?: string;
+}
+
 @Injectable({
 	providedIn: 'root'
 })
@@ -41,11 +48,11 @@ export class WebSocketService {
 		return this._connection.pipe( map( message => JSON.parse( message.data ) ) )
 	}
 
-	public connectToResponseType( type: string ) {
+	public connectToResponseType( type: string ): Observable<Message> {
 		return this.connectToData().pipe( filter( response => response.type == type ) )
 	}
 
-	public send( data: any ) {
+	public send( data: Message ) {
 		this.connected.then( () => {
 			if( this.ws.readyState === WebSocket.OPEN ) {
 				console.log( "Send Message" )
