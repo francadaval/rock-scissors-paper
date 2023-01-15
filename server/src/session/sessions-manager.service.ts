@@ -40,36 +40,49 @@ export class SessionManagerService implements MessageHandler {
 
         switch( message.content.command ) {
             case 'login':
-                this.logger.trace( 'Received login message from user: ' + content.username )
-                session = await this.login( content.username, content.password, connectionContext )
+                this.logger.trace( 'Received login message from user: ' + content.username );
+                connectionContext.session = await this.login( content.username, content.password, connectionContext );
+                this.sendSessionResponse(connectionContext, message.content.command);
                 break;
             case 'continue_session':
-                this.logger.trace( 'Received continue_session message from user: ' + content.username )
-                session = await this.continue( content.session_id, connectionContext.ip )
+                this.logger.trace( 'Received continue_session message from user: ' + content.username );
+                connectionContext.session = await this.continue( content.session_id, connectionContext.ip );
+                this.sendSessionResponse(connectionContext, message.content.command);
                 break;
             case 'logout':
                 this.logger.trace( 'Received logout message from user: ' + content.username )
                 await this.logout(content.session_id);
+                this.sendSessionResponse(connectionContext, message.content.command);
                 connectionContext.session = null;
                 break;
             default:
                 this.logger.error('Unknown message of type "user-session".')
                 return;
         }
+    }
 
-        connectionContext.session = session;
-        if(session) {
-            this.linkSession(session, connectionContext.ws);
+    protected sendSessionResponse(connectionContext: ConnectionContext, command: string) {
+        if(connectionContext.session) {
+            this.linkSession(connectionContext.session, connectionContext.ws);
+
+            this.websocketsService.sendMessage(connectionContext.ws, {
+                type: USER_SESSION_MESSAGE_TYPE,
+                content: {
+                    command: command,
+                    username: connectionContext.session.username,
+                    id: connectionContext.session._id
+                }
+            });
+        } else {
+            this.websocketsService.sendErrorMessage(connectionContext.ws, {
+                type: USER_SESSION_MESSAGE_TYPE,
+                error: "Error",
+                error_code: 1,
+                content: {
+                    command: command
+                }
+            })
         }
-
-        this.websocketsService.sendMessage(connectionContext.ws, {
-            type: USER_SESSION_MESSAGE_TYPE,
-            content: {
-                command: message.content.command,
-                username: session.username,
-                id: session._id
-            }
-        })
     }
 
     protected async login(username: any, password: any, connectionContext: ConnectionContext): Promise<UserSession> {
@@ -86,7 +99,6 @@ export class SessionManagerService implements MessageHandler {
 
     protected async continue(session_id: any, ip: string): Promise<UserSession> {
         let session = this.sessions[session_id];
-
         return session?.ip == ip ? session : null;
     }
 
