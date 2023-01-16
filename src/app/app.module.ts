@@ -9,6 +9,7 @@ import { AppComponent } from './app.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -19,13 +20,15 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { LoginComponent } from './components/login/login.component';
 import { MainComponent } from './components/main/main.component';
 import { RoomsListComponent } from './components/rooms/rooms-list.component';
+import { ConnectionConsoleComponent } from './components/debug/connection-console/connection-console.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     LoginComponent,
     MainComponent,
-    RoomsListComponent
+    RoomsListComponent,
+    ConnectionConsoleComponent
   ],
   imports: [
     BrowserModule,
@@ -37,6 +40,7 @@ import { RoomsListComponent } from './components/rooms/rooms-list.component';
     MatButtonModule,
     MatCardModule,
     MatDividerModule,
+    MatExpansionModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
