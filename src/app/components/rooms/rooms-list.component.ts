@@ -1,4 +1,5 @@
 import { Component } from "@angular/core";
+import { Router } from "@angular/router";
 import { Room } from "src/app/entities/room.entity";
 import { RoomsService } from "src/app/services/rooms.service";
 
@@ -8,7 +9,7 @@ import { RoomsService } from "src/app/services/rooms.service";
 })
 export class RoomsListComponent {
 
-	constructor(protected roomsService: RoomsService) {}
+	constructor(protected roomsService: RoomsService, private router: Router) {}
 
     get freeRooms(): Room[] {
         return this.roomsService.freeRooms;
@@ -16,5 +17,18 @@ export class RoomsListComponent {
 
     get userRooms(): Room[] {
         return this.roomsService.userRooms;
+    }
+
+    joinRoom(id: string) {
+        let subscription = this.roomsService.joinedToRoom.subscribe(room => {
+            this.router.navigate(['room/' + room._id]);
+            subscription.unsubscribe();
+        });
+
+        this.roomsService.joinRoom(id);
+    }
+
+    leaveRoom(id: string) {
+        this.roomsService.leaveRoom(id);
     }
 }
