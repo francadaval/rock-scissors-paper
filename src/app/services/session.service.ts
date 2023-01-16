@@ -28,12 +28,16 @@ export class SessionService {
 	}
 
 	protected _userSession: UserSession;
-	protected $userSession: Promise<UserSession>;
+	protected _$userSession: Promise<UserSession>;
 
 	protected sessionObservable: Observable<Message>;
 
-	public get userSession(): Promise<UserSession> {
-		return this.$userSession || Promise.resolve( this._userSession );
+	public get $userSession(): Promise<UserSession> {
+		return this._$userSession || Promise.resolve( this._userSession );
+	}
+
+	public get userSession(): UserSession {
+		return this._userSession;
 	}
 
 	public checkUser(): Promise<UserSession> {
@@ -41,15 +45,15 @@ export class SessionService {
 	}
 
 	public login( username: string, password: string ): Promise<UserSession> {
-		if( !this.$userSession ) {
-			this.$userSession = new Promise( (resolve,reject) => {
+		if( !this._$userSession ) {
+			this._$userSession = new Promise( (resolve,reject) => {
 				let loginSubscription = this.sessionObservable
 					.pipe(filter( message => message.content.command == LOGIN_COMMAND ))
 					.subscribe( message => {
 						console.log( "Login response: " + JSON.stringify(message) )
 						if( !message.error && message.content.username == username ) {
 							this.setUserSession( message.content );
-							resolve( this.userSession )
+							resolve( this._userSession )
 						} else {
 							this.setUserSession( null );
 							reject( message )
@@ -68,7 +72,7 @@ export class SessionService {
 				})
 			})
 
-			return this.$userSession
+			return this._$userSession
 		} else {
 			return Promise.reject()
 		}
@@ -76,8 +80,8 @@ export class SessionService {
 
 	protected checkUserSession(): Promise<UserSession> {
 		let sessionId = localStorage.getItem( SESSION_ID )
-		if( !this.$userSession && sessionId ) {
-			this.$userSession = new Promise( (resolve,reject) => {
+		if( !this._$userSession && sessionId ) {
+			this._$userSession = new Promise( (resolve,reject) => {
 				
 				let sessionSubscription = this.sessionObservable
 					.pipe(filter( message => message.content.command == CONTINUE_SESSION_COMMAND ))
@@ -85,7 +89,7 @@ export class SessionService {
 						console.log( "Continue session response: " + JSON.stringify(message) )
 						if( !message.error ) {
 							this.setUserSession( message.content );
-							resolve( this.userSession )
+							resolve( this._userSession )
 						} else {
 							this.setUserSession( null );
 							reject( message )
@@ -103,9 +107,9 @@ export class SessionService {
 				})
 			})
 
-			return this.$userSession
+			return this._$userSession
 		} else {
-			console.log( this.$userSession ? "Ya existe $user" : ( !sessionId ? "No hay session previa" : "???" ) )
+			console.log( this._$userSession ? "Ya existe $user" : ( !sessionId ? "No hay session previa" : "???" ) )
 			return Promise.reject()
 		}
 	}
@@ -117,6 +121,6 @@ export class SessionService {
 			localStorage.removeItem( SESSION_ID );
 
 		this._userSession = userSession
-		this.$userSession = null
+		this._$userSession = null
 	}
 }
