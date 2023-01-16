@@ -63,11 +63,15 @@ export class SessionManagerService implements MessageHandler, Broadcaster {
     }
 
     public sendUserMessage(username: string, message: Message): void {
-        Object.values(this.sessions).find(session => session.username == username).sendMessage(message);
+        Object.values(this.sessions)
+            .filter(session => session.username == username)
+            .forEach(session => session.sendMessage(message));
     }
     
     public sendUserErrorMessage(username: string, message: ErrorMessage): void {
-        Object.values(this.sessions).find(session => session.username == username).sendError(message);
+        Object.values(this.sessions)
+            .filter(session => session.username == username)
+            .forEach(session => session.sendError(message));
     }
     
 	public broadcastMessage( message: Message ): void {

@@ -56,7 +56,7 @@ export class RoomsService implements MessageHandler {
 
         this.roomsRepository.save(room);
 
-        this.sendUserRoomMsg(room);
+        this.sendUserRoomMsg(room, messageContent.command);
         this.sendFreeRoomsMsg();
     }
     
@@ -65,7 +65,7 @@ export class RoomsService implements MessageHandler {
 
         if(room && room.users.length == 1) {
             room.users.push(username);
-            this.sendUserRoomMsg(room);
+            this.sendUserRoomMsg(room, messageContent.command);
             this.sendFreeRoomsMsg();
         } else {
             this.sendError(messageContent.command, username);
@@ -85,7 +85,7 @@ export class RoomsService implements MessageHandler {
             this.roomsRepository.save(room);
         }
 
-        this.sendUserRoomMsg(room);
+        this.sendUserRoomMsg(room, messageContent.command);
         this.sendFreeRoomsMsg();
     }
 
@@ -102,11 +102,12 @@ export class RoomsService implements MessageHandler {
         });
     }
 
-    protected async sendUserRoomMsg(room: Room) {
+    protected async sendUserRoomMsg(room: Room, command: string) {
         room.users.forEach(username => {
             this.broadcaster.sendUserMessage(username, {
                 type: ROOMS_TYPE,
                 content: {
+                    command,
                     room
                 }
             })
