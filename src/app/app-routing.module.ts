@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { LoginComponent } from './components/login/login.component';
 import { MainComponent } from './components/main/main.component';
+import { RoomComponent } from './components/room/room.component';
 import { AuthUserGuard } from './guards/auth-user.guard';
 
 const routes: Routes = [{
@@ -10,6 +11,10 @@ const routes: Routes = [{
 }, {
   path: '',
   component: MainComponent,
+  canActivate: [AuthUserGuard]
+}, {
+  path: 'room/:id',
+  component: RoomComponent,
   canActivate: [AuthUserGuard]
 }];
 

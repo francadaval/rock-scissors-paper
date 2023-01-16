@@ -6,6 +6,8 @@ import { ConnectionContext } from "../websockets/connection-context";
 import { MessageHandler } from "../websockets/message-handler";
 import { WebSocketsService } from "../websockets/websockets.service";
 
+import crypto = require('crypto')
+
 const ROOMS_TYPE: string = "rooms";
 
 export class RoomsService implements MessageHandler {

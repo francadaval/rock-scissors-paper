@@ -87,4 +87,14 @@ export class RoomsService {
             }
         })
     }
+
+    public createRoom(name: string) {
+        this.wsService.send({
+            type: ROOMS_MESSAGE_TYPE,
+            content: {
+                command: CREATE_ROOM_COMMAND,
+                name: name
+            }
+        })
+    }
 }

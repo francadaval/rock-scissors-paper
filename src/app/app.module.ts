@@ -19,8 +19,9 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 
 import { LoginComponent } from './components/login/login.component';
 import { MainComponent } from './components/main/main.component';
-import { RoomsListComponent } from './components/rooms/rooms-list.component';
 import { ConnectionConsoleComponent } from './components/debug/connection-console/connection-console.component';
+import { RoomsListComponent } from './components/main/rooms-list.component';
+import { RoomComponent } from './components/room/room.component';
 
 @NgModule({
   declarations: [
@@ -28,7 +29,8 @@ import { ConnectionConsoleComponent } from './components/debug/connection-consol
     LoginComponent,
     MainComponent,
     RoomsListComponent,
-    ConnectionConsoleComponent
+    ConnectionConsoleComponent,
+    RoomComponent
   ],
   imports: [
     BrowserModule,

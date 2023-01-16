@@ -21,7 +21,7 @@ export class RoomsListComponent {
 
     joinRoom(id: string) {
         let subscription = this.roomsService.joinedToRoom.subscribe(room => {
-            this.router.navigate(['room/' + room._id]);
+            this.router.navigate(['/room/' + room._id]);
             subscription.unsubscribe();
         });
 
@@ -30,5 +30,9 @@ export class RoomsListComponent {
 
     leaveRoom(id: string) {
         this.roomsService.leaveRoom(id);
+    }
+
+    createRoom() {
+        this.roomsService.createRoom("New room");
     }
 }
