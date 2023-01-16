@@ -3,7 +3,13 @@ import { RoomsRepository } from "../rooms.repository";
 
 const ROOMS: {
     [id:string]: Room
-} = {};
+} = {
+    "r1": {
+        _id: "r1",
+        name: "Room #1",
+        users: ["user1"]
+    }
+};
 
 export class DummyRoomsRepositoryImpl implements RoomsRepository {
     public async findOneById(id: string): Promise<Room>{

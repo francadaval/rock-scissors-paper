@@ -35,7 +35,7 @@ export class RoomsService implements MessageHandler {
     async handleMessage(message: Message, connectionContext: ConnectionContext) {
         if (message.type == ROOMS_TYPE) {
             let command = message.content.command;
-            let username = connectionContext.session.username;
+            let username = connectionContext.session?.username;
 
             this.logger.trace("Command " + command + " from " + username);
 
