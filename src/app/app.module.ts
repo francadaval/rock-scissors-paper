@@ -12,16 +12,20 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatListModule } from '@angular/material/list';
+import { MatTabsModule } from '@angular/material/tabs';
 import { MatToolbarModule } from '@angular/material/toolbar';
 
 import { LoginComponent } from './components/login/login.component';
 import { MainComponent } from './components/main/main.component';
+import { RoomsListComponent } from './components/rooms/rooms-list.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     LoginComponent,
-    MainComponent
+    MainComponent,
+    RoomsListComponent
   ],
   imports: [
     BrowserModule,
@@ -36,6 +40,8 @@ import { MainComponent } from './components/main/main.component';
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
+    MatListModule,
+    MatTabsModule,
     MatToolbarModule
   ],
   providers: [],
