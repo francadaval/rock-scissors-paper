@@ -56,7 +56,7 @@ export class SessionService {
 							resolve( this._userSession )
 						} else {
 							this.setUserSession( null );
-							reject( message )
+							resolve( null )
 						}
 						loginSubscription.unsubscribe();
 					});		
@@ -92,7 +92,7 @@ export class SessionService {
 							resolve( this._userSession )
 						} else {
 							this.setUserSession( null );
-							reject( message )
+							resolve( null )
 						}
 						sessionSubscription.unsubscribe();
 					});		
@@ -105,12 +105,12 @@ export class SessionService {
 						session_id: sessionId
 					}
 				})
-			})
+			});
 
 			return this._$userSession
 		} else {
 			console.log( this._$userSession ? "Ya existe $user" : ( !sessionId ? "No hay session previa" : "???" ) )
-			return Promise.reject()
+			return Promise.resolve(this._userSession);
 		}
 	}
 
