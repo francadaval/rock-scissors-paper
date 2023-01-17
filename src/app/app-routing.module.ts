@@ -4,6 +4,7 @@ import { LoginComponent } from './components/login/login.component';
 import { MainComponent } from './components/main/main.component';
 import { RoomComponent } from './components/room/room.component';
 import { AuthUserGuard } from './guards/auth-user.guard';
+import { RoomsGuard } from './guards/rooms.guard';
 
 const routes: Routes = [{
   path: 'login',
@@ -15,7 +16,7 @@ const routes: Routes = [{
 }, {
   path: 'room/:id',
   component: RoomComponent,
-  canActivate: [AuthUserGuard]
+  canActivate: [AuthUserGuard, RoomsGuard]
 }];
 
 @NgModule({
