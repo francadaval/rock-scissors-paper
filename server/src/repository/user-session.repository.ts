@@ -1,7 +1,6 @@
 import { UserSession } from "../entities/user-session";
+import { Repository } from "./repository";
 
-export interface UserSessionRepository {
-    save: (session: UserSession) => Promise<void>;
+export interface UserSessionRepository extends Repository<UserSession> {
     deleteByUsername: (username: string) => Promise<void>;
-    deleteById: (id: string) => Promise<void>;
 }

@@ -111,7 +111,7 @@ export class SessionManagerService implements MessageHandler, Broadcaster {
     }
 
     protected async login(username: any, password: any, connectionContext: ConnectionContext): Promise<UserSession> {
-        let user = await this.userRepository.findOne(username, password);
+        let user = await this.userRepository.findOneByUsernameAndPassword(username, password);
 
         if( user ) {
 			this.logger.info( "Init session: " + username )
@@ -132,7 +132,7 @@ export class SessionManagerService implements MessageHandler, Broadcaster {
 
         if(session) {
             session.terminate();
-            await this.userSessionRepository.deleteById(session._id);
+            await this.userSessionRepository.delete(session);
             delete this.sessions[session_id];
         }
     }

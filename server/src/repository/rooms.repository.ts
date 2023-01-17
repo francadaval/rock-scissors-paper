@@ -1,10 +1,8 @@
 import { Room } from "../entities/room.entity";
+import { Repository } from "./repository";
 
-export interface RoomsRepository {
+export interface RoomsRepository extends Repository<Room>{
 
-    findOneById: (id: string) => Promise<Room>;
-    findByUsername: (username: string) => Promise<Room[]>;
-    findFreeRooms: () => Promise<Room[]>;
-    save: (room: Room) => Promise<void>;
-    delete: (room: Room) => Promise<void>;
+    findByUsername(username: string): Promise<Room[]>;
+    findFreeRooms(): Promise<Room[]>;
 }

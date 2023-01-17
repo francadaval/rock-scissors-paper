@@ -45,11 +45,11 @@ export class RoomsService implements MessageHandler {
         }
     }
 
-    async listRooms(messageContent: any, username: string) {
+    protected async listRooms(messageContent: any, username: string) {
         this.sendRoomsList(username);
     }
 
-    async createRoom(messageContent: any, username: string) {
+    protected async createRoom(messageContent: any, username: string) {
         let room: Room = {
             _id: crypto.randomUUID(),
             name: messageContent.name,
@@ -62,7 +62,7 @@ export class RoomsService implements MessageHandler {
         this.sendFreeRoomsMsg();
     }
     
-    async joinRoom(messageContent: any, username: string) {
+    protected async joinRoom(messageContent: any, username: string) {
         let room: Room = await this.roomsRepository.findOneById(messageContent.id);
 
         if(room && room.users.length == 1) {
@@ -74,7 +74,7 @@ export class RoomsService implements MessageHandler {
         }
     }
 
-    async leaveRoom(messageContent: any, username: string) {
+    protected async leaveRoom(messageContent: any, username: string) {
         let room: Room = await this.roomsRepository.findOneById(messageContent.id);
 
         if(room && room.users.includes(username)) {

@@ -18,7 +18,19 @@ const USERS: {[id:string]: User} = {
 
 export class DummyUserRepositoryImpl implements UserRepository {
 
-    async findOne(username: string, password: string): Promise<User> {
+    async findOneById(id: string): Promise<User> {
+        return USERS[id];
+    }
+
+    async save(user: User): Promise<void> {
+        USERS[user.username] = user;
+    }
+
+    async delete(user: User): Promise<void> {
+        delete USERS[user.username];
+    }
+
+    async findOneByUsernameAndPassword(username: string, password: string): Promise<User> {
         let user = USERS[username];
         return (user && user.password == password) ? user : null;
     }
