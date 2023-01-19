@@ -2,51 +2,77 @@ import { getLogger, Logger } from "log4js";
 import { Room } from "../entities/room.entity";
 import { RoomsRepository } from "../repository/rooms.repository";
 import { Broadcaster } from "../websockets/broadcaster";
-import { ConnectionContext } from "../websockets/connection-context";
-import { MessageHandler } from "../websockets/message-handler";
 import { WebSocketsService } from "../websockets/websockets.service";
 
 import crypto = require('crypto')
+import { Game } from "../entities/game.entity";
+import { GamesRepository } from "../repository/games.repository";
+import { AbstractService } from "./abstract.service";
 
 const ROOMS_TYPE: string = "rooms";
 
-export class RoomsService implements MessageHandler {
+export class RoomsService extends AbstractService {
 
     constructor(
         roomsRepository: RoomsRepository,
+        gamesRepository: GamesRepository,
         websocketsService: WebSocketsService,
-        broadcaster: Broadcaster ){
+        broadcaster: Broadcaster ) {
+
+        super(websocketsService, broadcaster, ROOMS_TYPE);
 
         this.roomsRepository = roomsRepository;
-        this.websocketsService = websocketsService;
-        this.broadcaster = broadcaster;
+        this.gamesRepository = gamesRepository;
 
-        websocketsService.addHandler(this);
-    }
-
-    acceptType(type: string): boolean {
-        return type === ROOMS_TYPE;
+        this.registerCommandFunction("createGame", (messageContent, username) => this.createGame(messageContent, username));
+        this.registerCommandFunction("listRooms", (messageContent, username) => this.listRooms(messageContent, username));
+        this.registerCommandFunction("createRoom", (messageContent, username) => this.createRoom(messageContent, username));
+        this.registerCommandFunction("leaveRoom", (messageContent, username) => this.leaveRoom(messageContent, username));
+        this.registerCommandFunction("joinRoom", (messageContent, username) => this.joinRoom(messageContent, username));
+        this.registerCommandFunction("getRoom", (messageContent, username) => this.getRoom(messageContent, username));
     }
 
     protected roomsRepository: RoomsRepository;
-    protected websocketsService: WebSocketsService;
-    protected broadcaster: Broadcaster;
-
+    protected gamesRepository: GamesRepository;
     protected logger: Logger = getLogger("RoomsService");
 
-    async handleMessage(message: Message, connectionContext: ConnectionContext) {
-        if (message.type == ROOMS_TYPE) {
-            let command = message.content.command;
-            let username = connectionContext.session?.username;
+    protected async createGame(messageContent: any, username: string) {
+        const command = messageContent.command;
+        const roomId = messageContent.roomId;
+        const rounds = messageContent.rounds || 5;
 
-            this.logger.trace("Command " + command + " from " + username);
-
-            return (username && this[command]) ? this[command](message.content, connectionContext.session.username) : null;
+        let room = await this.roomsRepository.findOneById(roomId);
+        
+        if(!room || room.currentGameId || room.users.length != 2) {
+            let error = !room ? "Room " + roomId + " not found." : (
+                room.currentGameId ? "Room already have a current game." : (
+                    room.users.length != 2 ? "There are not two players on room." : ""
+                ));
+            this.sendErrorMessageToUser(username, command, error)
+            return;
         }
+
+        let game: Game = {
+            _id: crypto.randomUUID(),
+            roomId: (await room)._id,
+            rounds: rounds,
+            currentRound: 0,
+            moves: []
+        }
+        
+        this.gamesRepository.save(game);
+
+        room.currentGameId = game._id;
+        this.roomsRepository.save(room);
+
+        this.sendMessageToUsers(room.users, {game}, command);
     }
 
     protected async listRooms(messageContent: any, username: string) {
-        this.sendRoomsList(username);
+        let free_rooms = await this.roomsRepository.findFreeRooms();
+        let user_rooms = await this.roomsRepository.findByUsername(username);
+
+        this.sendMessageToUser(username, {free_rooms, user_rooms}, messageContent.command);
     }
 
     protected async createRoom(messageContent: any, username: string) {
@@ -58,8 +84,8 @@ export class RoomsService implements MessageHandler {
 
         this.roomsRepository.save(room);
 
-        this.sendUserRoomMsg(room, messageContent.command);
-        this.sendFreeRoomsMsg();
+        this.sendMessageToUsers(room.users, {room}, messageContent.command);
+        this.broadcastFreeRoomsMsg();
     }
     
     protected async joinRoom(messageContent: any, username: string) {
@@ -67,10 +93,10 @@ export class RoomsService implements MessageHandler {
 
         if(room && room.users.length == 1) {
             room.users.push(username);
-            this.sendUserRoomMsg(room, messageContent.command);
-            this.sendFreeRoomsMsg();
+            this.sendMessageToUsers(room.users, {room}, messageContent.command);
+            this.broadcastFreeRoomsMsg();
         } else {
-            this.sendError(messageContent.command, username);
+            this.sendErrorMessageToUser(messageContent.command, username);
         }
     }
 
@@ -87,58 +113,25 @@ export class RoomsService implements MessageHandler {
             this.roomsRepository.save(room);
         }
 
-        this.sendUserRoomMsg(room, messageContent.command);
-        this.sendRoomMsg(username, room, messageContent.command);
-        this.sendFreeRoomsMsg();
+        this.sendMessageToUsers(room.users, {room}, messageContent.command);
+        this.broadcastFreeRoomsMsg();
     }
 
-    protected async sendRoomsList(username: string) {
+    protected async getRoom(messageContent: any, username: string) {
+        const roomId = messageContent.roomId;
+        const command = messageContent.command;
+        
+        let room = await this.roomsRepository.findOneById(roomId);
+        if(!room || !room.users.includes(username)) {
+            this.sendErrorMessageToUser(username, command);
+            return;
+        }
+
+        this.sendMessageToUsers(room.users, {room}, command);
+    }
+
+    protected async broadcastFreeRoomsMsg() {
         let free_rooms = await this.roomsRepository.findFreeRooms();
-        let user_rooms = await this.roomsRepository.findByUsername(username);
-
-        this.broadcaster.sendUserMessage(username, {
-            type: ROOMS_TYPE,
-            content: {
-                free_rooms,
-                user_rooms
-            }
-        });
-    }
-
-    protected async sendUserRoomMsg(room: Room, command: string) {
-        room.users.forEach(username => {
-            this.sendRoomMsg(username, room, command);
-        })
-    }
-
-    protected async sendRoomMsg(username: string, room: Room, command: string) {
-        this.broadcaster.sendUserMessage(username, {
-            type: ROOMS_TYPE,
-            content: {
-                command,
-                room
-            }
-        })
-    }
-
-    protected async sendFreeRoomsMsg() {
-        let free_rooms = await this.roomsRepository.findFreeRooms();
-        this.broadcaster.broadcastMessage({
-            type: ROOMS_TYPE,
-            content: {
-                free_rooms
-            }
-        })
-    }
-
-    protected async sendError(command: string, username: string) {
-        this.broadcaster.sendUserErrorMessage(username, {
-            type: ROOMS_TYPE,
-            error: "Error",
-            error_code: 1,
-            content: {
-                command
-            }
-        })
+        this.broadcastMessage(free_rooms);
     }
 }

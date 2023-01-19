@@ -8,6 +8,8 @@ import { DummyUserRepositoryImpl } from './repository/dummy/dummy-user.repositor
 import { DummyUserSessionRepositoryImpl } from './repository/dummy/dummy-user-session.repository-impl';
 import { RoomsService } from './game/rooms.service';
 import { DummyRoomsRepositoryImpl } from './repository/dummy/dummy-rooms.repository-impl';
+import { GamesService } from './game/game.service';
+import { DummyGamesRepository } from './repository/dummy/dummy-games.repository-impl';
 
 loadConfigFile( 'config.yml' );
 
@@ -23,6 +25,9 @@ initWebServer();
 
 let webSocketServer = new WebSocketsService(getConfigValue('ws.port'));
 
+let roomsRepository = new DummyRoomsRepositoryImpl();
+let gamesRepository =new DummyGamesRepository();
+
 let sessionManagerService = new SessionManagerService(
 	new DummyUserRepositoryImpl(),
 	new DummyUserSessionRepositoryImpl(),
@@ -30,7 +35,15 @@ let sessionManagerService = new SessionManagerService(
 );
 
 let roomsService = new RoomsService(
-	new DummyRoomsRepositoryImpl(),
+	roomsRepository,
+	gamesRepository,
+	webSocketServer,
+	sessionManagerService
+)
+
+let gamesService = new GamesService(
+	roomsRepository,
+	gamesRepository,
 	webSocketServer,
 	sessionManagerService
 )
