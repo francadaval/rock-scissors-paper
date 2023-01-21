@@ -3,7 +3,13 @@
 		<div mat-card-avatar>
 			<mat-icon color="primary">home</mat-icon>
 		</div>
-		<mat-card-title>Room Component</mat-card-title>
+		<mat-card-title>Room - {{room?.name}}</mat-card-title>
+		<mat-card-subtitle>Players: {{room?.users[0]}}{{room?.users.length == 2 ? " - " : ""}}{{room?.users[1]}}</mat-card-subtitle>
 	</mat-card-header>
-	<app-rooms-list></app-rooms-list>
+	<mat-card-content>
+		<app-game [game]="($currentGame | async)" [room]="room"></app-game>
+	</mat-card-content>
+	<mat-card-actions *ngIf="!($currentGame | async)">
+		<button [disabled]="disabledCreateGame" (click)="createGame()" mat-raised-button color="primary">Start game</button>
+	</mat-card-actions>
 </mat-card>

@@ -1,0 +1,48 @@
+<mat-card *ngIf="game">
+	<mat-card-header>
+		<mat-card-title>Game</mat-card-title>
+		<mat-card-subtitle>Round: {{game.currentRound+1}}/{{game.rounds}}</mat-card-subtitle>
+	</mat-card-header>
+    <mat-card-content>
+		<div *ngIf="game.currentRound >= 0" class="game-panel">
+			<div
+				class="move rock"
+				[ngClass]="{'selected' : isSelected(Move.ROCK), 'sent': isSent(Move.ROCK) }"
+				(click)="select(Move.ROCK)">
+			</div>
+			<div
+				class="move paper"
+				[ngClass]="{'selected' : isSelected(Move.PAPER), 'sent': isSent(Move.PAPER) }"
+				(click)="select(Move.PAPER)">
+			</div>
+			<div
+				class="move scissors"
+				[ngClass]="{'selected' : isSelected(Move.SCISSORS), 'sent': isSent(Move.SCISSORS) }"
+				(click)="select(Move.SCISSORS)">
+			</div>
+		</div>
+		<div *ngIf="game.currentRound == -1" class="result">
+			Game finished: {{gameResult()}}
+		</div>
+		<mat-list>
+			<mat-list-item *ngFor="let roundMoves of completedRounds; index as i;">
+				Round: {{completedRounds.length - i}}/{{game.rounds}}
+				you: <div class="l-move" [ngClass]="userMoveClass(roundMoves)"></div>
+				opponent: <div class="l-move" [ngClass]="opponentMoveClass(roundMoves)"></div>
+				{{winner(roundMoves)}}
+			</mat-list-item>
+		</mat-list>
+    </mat-card-content>
+    <mat-card-actions>
+		<button [disabled]="disableSendMove()" (click)="sendMove()" mat-raised-button color="primary">SendMove</button>
+	</mat-card-actions>
+</mat-card>
+
+<mat-card *ngIf="!game">
+    <mat-card-header>
+		<mat-card-title>No current game</mat-card-title>
+		<mat-card-subtitle>Create a new game to start</mat-card-subtitle>
+	</mat-card-header>
+    <mat-card-content>
+    </mat-card-content>
+</mat-card>

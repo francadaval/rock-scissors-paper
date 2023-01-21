@@ -2,6 +2,7 @@ body {
     height: 100%;
     width: 100%;
     margin: 0;
+    font-family:var(--mdc-typography-body1-font-family, var(--mdc-typography-font-family, Roboto, sans-serif))
 }
 
 app-root {
@@ -61,6 +62,61 @@ app-connection-console {
 
         span.sent {
         	color: yellow;
+        }
+    }
+}
+
+app-game {
+    .game-panel {
+        display: flex;
+
+        .move {
+            margin: 5px;
+            height: 200px;
+            width: 150px;
+            border-color: white;
+            border-style: solid;
+            border-width: 3px;
+            background-size: cover;
+            
+            &.rock {
+                background-image: url("/assets/img/rock.png");
+            }
+
+            &.scissors {
+                background-image: url("/assets/img/scissors.png");
+            }
+
+            &.paper {
+                background-image: url("/assets/img/paper.png");
+            }
+
+            &.selected {
+                border-color: blue;
+            }
+
+            &.sent {
+                border-color: red;
+            }
+        }
+    }
+
+    .l-move {
+        height: 40px;
+        width: 40px;
+        background-size: cover;
+        display: inline-block;
+
+        &.rock {
+            background-image: url("/assets/img/rock_l.png");
+        }
+
+        &.scissors {
+            background-image: url("/assets/img/scissors_l.png");
+        }
+
+        &.paper {
+            background-image: url("/assets/img/paper_l.png");
         }
     }
 }
