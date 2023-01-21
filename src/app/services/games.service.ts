@@ -20,40 +20,15 @@ export class GamesService {
         let observable: Observable<Message> = this.wsService.connectToResponseType(GAMES_MESSAGE_TYPE)
             .pipe(filter(message => message.content?.game?._id == gameId));
         
-            this.wsService.send({
-                type: GAMES_MESSAGE_TYPE,
-                content: {
-                    command: GET_GAME_COMMAND,
-                    gameId
-                }
-            })       
+        this.wsService.send({
+            type: GAMES_MESSAGE_TYPE,
+            content: {
+                command: GET_GAME_COMMAND,
+                gameId
+            }
+        })       
 
         return observable;
-    }
-
-    async createGame(roomId: string, rounds: number) {
-        return new Promise((resolve, reject) => {
-            let subscription = this.wsService.connectToResponseType(GAMES_MESSAGE_TYPE)
-                .pipe(filter(message => message.content?.command == CREATE_GAME_COMMAND))
-                .subscribe((message) => {
-                    if(!message.error) {
-                        resolve(<Game>message.content.game);
-                    } else {
-                        reject(message.error);
-                    }
-
-                    subscription.unsubscribe();
-                });
-
-            this.wsService.send({
-                type: GAMES_MESSAGE_TYPE,
-                content: {
-                    command: CREATE_GAME_COMMAND,
-                    roomId,
-                    rounds
-                }
-            })
-        })
     }
 
     async playGame(gameId: string, move: Move) {

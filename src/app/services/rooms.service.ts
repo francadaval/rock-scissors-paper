@@ -1,7 +1,9 @@
 import { EventEmitter, Injectable } from "@angular/core";
+import { filter, Observable } from "rxjs";
+import { Game } from "../entities/game.entity";
 import { Room } from "../entities/room.entity";
 import { SessionService } from "./session.service";
-import { WebSocketService } from "./websocket.service";
+import { Message, WebSocketService } from "./websocket.service";
 
 const ROOMS_MESSAGE_TYPE = "rooms"
 
@@ -9,6 +11,8 @@ const LIST_ROOMS_COMMAND = "listRooms";
 const CREATE_ROOM_COMMAND = "createRoom";
 const JOIN_ROOM_COMMAND = "joinRoom";
 const LEAVE_ROOM_COMMAND = "leaveRoom";
+const GET_ROOM_COMMAND = "getRoom";
+const CREATE_GAME_COMMAND = "createGame"
 
 @Injectable({
 	providedIn: 'root'
@@ -95,6 +99,46 @@ export class RoomsService {
                 command: CREATE_ROOM_COMMAND,
                 name: name
             }
+        })
+    }
+
+    public observeRoom(roomId: string): Observable<Message> {
+        let observable: Observable<Message> = this.wsService.connectToResponseType(ROOMS_MESSAGE_TYPE)
+            .pipe(filter(message => message.content?.room?._id == roomId));
+        
+        this.wsService.send({
+            type: ROOMS_MESSAGE_TYPE,
+            content: {
+                command: GET_ROOM_COMMAND,
+                roomId
+            }
+        })       
+
+        return observable;
+    }
+
+    async createGame(roomId: string, rounds: number) {
+        return new Promise((resolve, reject) => {
+            let subscription = this.wsService.connectToResponseType(ROOMS_MESSAGE_TYPE)
+                .pipe(filter(message => message.content?.command == CREATE_GAME_COMMAND))
+                .subscribe((message) => {
+                    if(!message.error) {
+                        resolve(<Game>message.content.game);
+                    } else {
+                        reject(message.error);
+                    }
+
+                    subscription.unsubscribe();
+                });
+
+            this.wsService.send({
+                type: ROOMS_MESSAGE_TYPE,
+                content: {
+                    command: CREATE_GAME_COMMAND,
+                    roomId,
+                    rounds
+                }
+            })
         })
     }
 }
