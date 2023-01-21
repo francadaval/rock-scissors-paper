@@ -1,5 +1,5 @@
 export enum Move {
-    ROCK,
+    ROCK = 1,
     PAPER,
     SCISSORS
 }
