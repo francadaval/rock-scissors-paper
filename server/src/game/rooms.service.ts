@@ -65,7 +65,7 @@ export class RoomsService extends AbstractService {
         room.currentGameId = game._id;
         this.roomsRepository.save(room);
 
-        this.sendMessageToUsers(room.users, {game}, command);
+        this.sendMessageToUsers(room.users, {room, game}, command);
     }
 
     protected async listRooms(messageContent: any, username: string) {
