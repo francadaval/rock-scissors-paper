@@ -27,49 +27,61 @@ export class RoomsService {
 
     public joinedToRoom: EventEmitter<Room> = new EventEmitter<Room>();
 
+    protected _$initializedService: Promise<boolean>;
+    get $initializedService(): Promise<boolean> { return this._$initializedService };
+
 	constructor( protected wsService: WebSocketService, protected sessionService: SessionService ) {
 		console.log( "Constructor SessionService" )
 
-		wsService.connectToResponseType(ROOMS_MESSAGE_TYPE).subscribe(msg => {
-            if(!msg.error) {
-                if(msg.content.user_rooms) {
-                    this._userRooms = [...msg.content.user_rooms];
-                }
 
-                if(msg.content.free_rooms) {
-                    this._freeRooms = [...msg.content.free_rooms];
-                }
+        this._$initializedService = new Promise((resolve, reject) => {
+            wsService.connectToResponseType(ROOMS_MESSAGE_TYPE).subscribe(msg => {
+                if(!msg.error) {
+                    if(msg.content.user_rooms) {
+                        this._userRooms = [...msg.content.user_rooms];
+                    }
+    
+                    if(msg.content.free_rooms) {
+                        this._freeRooms = [...msg.content.free_rooms];
+                    }
 
-                if(msg.content.room) {
-                    let room: Room = msg.content.room;
-                    let index = this._userRooms.findIndex(r => r._id == room._id);
-
-                    if(room.users.includes(sessionService.userSession.username)) {
-                        if(index >= 0) {
-                            this._userRooms[index] = msg.content.room;
+                    if(msg.content.command == LIST_ROOMS_COMMAND) {
+                        resolve(true);
+                    }
+    
+                    if(msg.content.room) {
+                        let room: Room = msg.content.room;
+                        let index = this._userRooms.findIndex(r => r._id == room._id);
+    
+                        if(room.users.includes(sessionService.userSession.username)) {
+                            if(index >= 0) {
+                                this._userRooms[index] = msg.content.room;
+                            } else {
+                                this._userRooms.push(msg.content.room);
+                            }
                         } else {
-                            this._userRooms.push(msg.content.room);
-                        }
-                    } else {
-                        if(index >= 0) {
-                            this._userRooms.splice(index, 1);
+                            if(index >= 0) {
+                                this._userRooms.splice(index, 1);
+                            }
                         }
                     }
+    
+                    if(msg.content.command == JOIN_ROOM_COMMAND && msg.content.room) {
+                        this.joinedToRoom.emit(msg.content.room);
+                    }
+                } else if(msg.content.command == LIST_ROOMS_COMMAND) {
+                    reject(msg.error);
                 }
-
-                if(msg.content.command == JOIN_ROOM_COMMAND && msg.content.room) {
-                    this.joinedToRoom.emit(msg.content.room);
+            });
+    
+            console.log("Ask for rooms lists.")
+            wsService.send({
+                type: ROOMS_MESSAGE_TYPE,
+                content: {
+                    command: LIST_ROOMS_COMMAND
                 }
-            }
+            })
         });
-
-        console.log("Ask for rooms lists.")
-        wsService.send({
-            type: ROOMS_MESSAGE_TYPE,
-            content: {
-                command: LIST_ROOMS_COMMAND
-            }
-        })
 	}
 
     public joinRoom(id: string) {

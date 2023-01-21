@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnDestroy, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { map, Observable, Subscription } from "rxjs";
 import { Game } from "src/app/entities/game.entity";
@@ -10,7 +10,7 @@ import { RoomsService } from "src/app/services/rooms.service";
 	selector: 'app-room',
 	templateUrl: './room.component.html'
 })
-export class RoomComponent implements OnInit {
+export class RoomComponent implements OnInit, OnDestroy {
 
 	constructor(
 		private route: ActivatedRoute,
@@ -51,6 +51,12 @@ export class RoomComponent implements OnInit {
 				});
 			}
 		});
+	}
+
+	ngOnDestroy() {
+		if(this.roomSubscription) {
+			this.roomSubscription.unsubscribe();
+		}
 	}
 
 	async createGame() {

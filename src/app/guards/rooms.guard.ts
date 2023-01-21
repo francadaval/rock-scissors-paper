@@ -14,6 +14,7 @@ export class RoomsGuard implements CanActivate {
     async canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot ) {
         const id = route.paramMap.get('id');
         console.log("RoomsGuard, check: " + id);
+        await this.roomsService.$initializedService;
         let room = this.roomsService.userRooms.find(room => room._id == id);
 
         return room ? true : this.router.parseUrl('/');
