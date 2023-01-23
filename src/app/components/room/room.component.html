@@ -1,7 +1,9 @@
 <mat-card>
 	<mat-card-header>
 		<div mat-card-avatar>
-			<mat-icon color="primary">home</mat-icon>
+			<button mat-icon-button [routerLink]="'/'" >
+				<mat-icon color="primary">home</mat-icon>
+			</button>
 		</div>
 		<mat-card-title>Room - {{room?.name}}</mat-card-title>
 		<mat-card-subtitle>Players: {{room?.users[0]}}{{room?.users.length == 2 ? " - " : ""}}{{room?.users[1]}}</mat-card-subtitle>
