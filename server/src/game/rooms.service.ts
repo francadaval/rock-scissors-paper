@@ -41,14 +41,19 @@ export class RoomsService extends AbstractService {
         const roomId = messageContent.roomId;
         const rounds = messageContent.rounds || 5;
 
-        let room = await this.roomsRepository.findOneById(roomId);
+        let room: Room = await this.roomsRepository.findOneById(roomId);
         
-        if(!room || room.currentGameId || room.users.length != 2) {
+        if(!room || room.users.length != 2) {
             let error = !room ? "Room " + roomId + " not found." : (
-                room.currentGameId ? "Room already have a current game." : (
                     room.users.length != 2 ? "There are not two players on room." : ""
-                ));
+                );
             this.sendErrorMessageToUser(username, command, error)
+            return;
+        }
+
+        let currentGame = room.currentGameId ? await this.gamesRepository.findOneById(room.currentGameId) : null;
+        if(currentGame && currentGame.currentRound != -1) {
+            this.sendErrorMessageToUser(username, command, "There is already a running game in room.")
             return;
         }
 
@@ -62,6 +67,9 @@ export class RoomsService extends AbstractService {
         
         this.gamesRepository.save(game);
 
+        if(room.currentGameId) {
+            room.previousGamesIds.push(room.currentGameId);
+        }
         room.currentGameId = game._id;
         this.roomsRepository.save(room);
 
@@ -80,6 +88,7 @@ export class RoomsService extends AbstractService {
             _id: crypto.randomUUID(),
             name: messageContent.name,
             users: [username],
+            previousGamesIds: []
         }
 
         this.roomsRepository.save(room);

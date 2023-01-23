@@ -7,7 +7,8 @@ const ROOMS: {
     "r1": {
         _id: "r1",
         name: "Room #1",
-        users: ["user1"]
+        users: ["user1"],
+        previousGamesIds: []
     }
 };
 

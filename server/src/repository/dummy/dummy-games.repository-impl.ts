@@ -10,6 +10,10 @@ export class DummyGamesRepository implements GamesRepository {
         return GAMES[id];
     }
 
+    public async findByRoomId(roomId: string): Promise<Game[]> {
+        return Object.values(GAMES).filter(game => game.roomId == roomId);
+    }
+
     public async save(game: Game): Promise<void> {
         GAMES[game._id] = game;
     }

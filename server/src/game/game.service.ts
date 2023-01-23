@@ -1,12 +1,9 @@
-import { MessageHandler } from '../websockets/message-handler';
 import { RoomsRepository } from '../repository/rooms.repository';
 import { WebSocketsService } from '../websockets/websockets.service';
 import { Broadcaster } from '../websockets/broadcaster';
 import { getLogger, Logger } from 'log4js';
-import { ConnectionContext } from '../websockets/connection-context';
 import { Game, Move } from '../entities/game.entity';
 
-import crypto = require('crypto')
 import { GamesRepository } from '../repository/games.repository';
 import { Room } from '../entities/room.entity';
 import { AbstractService } from './abstract.service';
@@ -28,6 +25,7 @@ export class GamesService extends AbstractService {
 
         this.registerCommandFunction("playGame", (messageContent, username) => this.playGame(messageContent, username));
         this.registerCommandFunction("getGame", (messageContent, username) => this.getGame(messageContent, username));
+        this.registerCommandFunction("getRoomPreviousGames", (messageContent, username) => this.getRoomPreviousGames(messageContent, username))
     }
 
     protected roomsRepository: RoomsRepository;
@@ -45,13 +43,28 @@ export class GamesService extends AbstractService {
             return;
         }
 
-        let room = await game?.roomId ? await this.roomsRepository.findOneById(game.roomId) : null;
+        let room = game?.roomId ? await this.roomsRepository.findOneById(game.roomId) : null;
         if(!room || !room.users.includes(username)) {
             this.sendErrorMessageToUser(username, command);
             return;
         }
 
         this.sendMessageToUser(username, {game}, command);
+    }
+
+    protected async getRoomPreviousGames(messageContent: any, username: string) {
+        const roomId: string = messageContent.roomId;
+        const command = messageContent.command;
+        
+        let room = roomId ? await this.roomsRepository.findOneById(roomId) : null;
+        if(!room || !room.users.includes(username)) {
+            this.sendErrorMessageToUser(username, command);
+            return;
+        }
+
+        let previousGames = (await this.gamesRepository.findByRoomId(roomId)).filter(game => game._id != room.currentGameId);
+
+        this.sendMessageToUser(username, {roomId, previousGames}, command);
     }
 
     protected async playGame(messageContent: any, username: string) {
