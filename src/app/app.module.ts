@@ -23,6 +23,7 @@ import { ConnectionConsoleComponent } from './components/debug/connection-consol
 import { RoomsListComponent } from './components/main/rooms-list.component';
 import { RoomComponent } from './components/room/room.component';
 import { GameComponent } from './components/room/game.component';
+import { PreviousGamesComponent } from './components/room/previous-games.component';
 
 @NgModule({
   declarations: [
@@ -32,7 +33,8 @@ import { GameComponent } from './components/room/game.component';
     RoomsListComponent,
     ConnectionConsoleComponent,
     RoomComponent,
-    GameComponent
+    GameComponent,
+    PreviousGamesComponent
   ],
   imports: [
     BrowserModule,

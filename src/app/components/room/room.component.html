@@ -9,6 +9,8 @@
 	<mat-card-content>
 		<app-game [game]="currentGame" [room]="room"></app-game>
 
+		<app-previous-games [previousGames]="previousGames"></app-previous-games>
+
 		<div class="create-game" *ngIf="!currentGame || currentGame.isFinished()">
 			<div>
 				<mat-form-field>

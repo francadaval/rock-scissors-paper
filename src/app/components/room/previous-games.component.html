@@ -1,0 +1,14 @@
+<mat-card *ngIf="previousGames?.length">
+	<mat-card-header>
+        <mat-card-title>
+            Previous Games
+        </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+        <mat-list>
+            <mat-list-item *ngFor="let game of previousGames; index as i;">
+                Game #{{i+1}}: {{resultText(game)}}
+            </mat-list-item>
+        </mat-list>
+    </mat-card-content>
+</mat-card>

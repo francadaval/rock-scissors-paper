@@ -21,7 +21,6 @@ export class GamesService {
             .pipe(
                 filter(message => message.content?.game?._id == gameId),
                 map(message => {
-                    console.log("Create Game instance from data.")
                     message.content.game = new Game(message.content.game);
                     return message;
                 })
@@ -41,8 +40,12 @@ export class GamesService {
     public observePreviousGames(roomId: string): Observable<Message> {
         let observable: Observable<Message> = this.wsService.connectToResponseType(GAMES_MESSAGE_TYPE)
             .pipe(
-                filter(message => (message.content?.room?._id == roomId && message.content?.command == GET_PREVIOUS_ROOMS_COMMAND)),
-                map(message => message.content.previousGames = message.content.previousGames.filter((gameData: GameData) => new Game(gameData)))
+                filter(message => (message.content?.roomId == roomId && message.content?.command == GET_PREVIOUS_ROOMS_COMMAND)),
+                map(message => {
+                    message.content.previousGames = message.content.previousGames
+                        .map((gameData: GameData) => new Game(gameData))
+                    return message;
+                })
             );
         
         this.wsService.send({
