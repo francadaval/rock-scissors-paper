@@ -19,8 +19,6 @@ export class GameComponent {
     set game(game: Game) {
         this.selectedMove = null;
         this._game = game;
-        this._currentRoundMoves = game?.moves[game.currentRound];
-        this._completedRounds = this.getCompletedRounds(game);
     }
     get game(): Game { return this._game; }
 
@@ -35,25 +33,12 @@ export class GameComponent {
     protected _opponent: string;
     get opponent(): string {return this._opponent;}
 
-    protected _currentRoundMoves: RoundMoves;
-    protected _completedRounds: RoundMoves[] = [];
-    get completedRounds(): RoundMoves[] {return this._completedRounds;}
-
     get Move() { return Move; }
     get username(): string { return this.sessionService.userSession?.username; }
     
-    protected getCompletedRounds(game: Game) {
-        if( game?.currentRound > 0 )
-            return this.game.moves.slice(0, this.game.currentRound).reverse();
-        if( game?.currentRound < 0 )
-            return this.game.moves.reverse();
-
-        return [];
-    }
-
     protected selectedMove: Move = null;
     protected get sentMove(): Move {
-        return this._currentRoundMoves ? this._currentRoundMoves[this.username] : null;
+        return this.game?.currentRoundMoves ? this.game.currentRoundMoves[this.username] : null;
     }
 
     select( move: Move ) {
@@ -86,20 +71,14 @@ export class GameComponent {
         return Move[moves[this.opponent]].toLowerCase();
     }
 
-    winner(moves: RoundMoves) {
-        let winnerMove: Move = this.winnerMove(moves[this.username], moves[this.opponent]);
-        return winnerMove == null ? "DRAW!!" : (winnerMove == moves[this.username] ? "YOU WIN!!" : "OPPONENT WINS!!");
+    winner(roundMoves: RoundMoves) {
+        return Game.roundMovesWinner(roundMoves);
     }
 
     gameResult() {
-        let userRounds = 0;
-        let opponentRounds = 0;
-
-        for(let move of this.game.moves) {
-            let winnerMove: Move = this.winnerMove(move[this.username], move[this.opponent]);
-            if(winnerMove == move[this.username]) userRounds++;
-            if(winnerMove == move[this.opponent]) opponentRounds++;
-        }
+        let gameResult = this.game.getResult();
+        let userRounds = gameResult[this.username];
+        let opponentRounds = gameResult[this.opponent];
 
         let result = "You tied the game!!";
         if(userRounds > opponentRounds)
@@ -108,18 +87,5 @@ export class GameComponent {
             result = "You lost the game!!"
 
         return "You won " + userRounds + " rounds and lost " + opponentRounds + ". " + result;
-    }
-
-    protected winnerMove(move1: Move, move2: Move): Move {
-        if( move1 == move2 ) return null;
-
-        switch(move1) {
-            case Move.ROCK:
-                return move2 == Move.SCISSORS ? move1 : move2;
-            case Move.SCISSORS:
-                return move2 == Move.PAPER ? move1 : move2;
-            case Move.PAPER:
-                return move2 == Move.ROCK ? move1 : move2;
-        }
     }
 }

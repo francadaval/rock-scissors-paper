@@ -20,15 +20,19 @@ export class RoomComponent implements OnInit, OnDestroy {
 
 	protected _roomId: string;
 	protected _room: Room;
-	protected $currentGame: Observable<Game>;
+	protected _currentGame: Game;
 	protected roomSubscription: Subscription;
 	protected calledCreateGame = false;
 
-	public get room(): Room { return this._room; };
+	public get room(): Room {return this._room; };
+	public get currentGame(): Game {return this._currentGame;}
 
 	public get disabledCreateGame(): boolean {
-		return this.calledCreateGame || !this.room || !!this.room.currentGameId;
+		return this.calledCreateGame || !this.room || this.roundsForNemGame < 1
+			|| (this._currentGame && !this._currentGame.isFinished());
 	}
+
+	public roundsForNemGame: number = 5;
 	
 	ngOnInit() {
 		this.route.params.subscribe(params => {
@@ -40,13 +44,22 @@ export class RoomComponent implements OnInit, OnDestroy {
 			}
 
 			if(this._roomId) {
+				let currentGameSubscription: Subscription = null;
 				this.roomSubscription = this.roomsService.observeRoom(this._roomId).subscribe(roomMessage => {
 					this._room = roomMessage.content.room;
+					if(currentGameSubscription) {
+						currentGameSubscription.unsubscribe();
+					}
 
 					if(this.room.currentGameId) {
-						this.$currentGame = this.gamesService.observeGame(this.room.currentGameId).pipe(map(message => message.content.game));
+						currentGameSubscription = this.gamesService
+							.observeGame(this.room.currentGameId)
+							.pipe(map(message => message.content.game))
+							.subscribe((game) => {
+								this._currentGame = game;
+							});
 					} else {
-						this.$currentGame = null;
+						currentGameSubscription = null;
 					}
 				});
 			}
@@ -61,7 +74,7 @@ export class RoomComponent implements OnInit, OnDestroy {
 
 	async createGame() {
 		this.calledCreateGame = true;
-		this.roomsService.createGame(this._roomId, 5);
+		this.roomsService.createGame(this._roomId, this.roundsForNemGame);
 		this.calledCreateGame = false;
 	}
 }

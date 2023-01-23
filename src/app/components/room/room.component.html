@@ -7,9 +7,16 @@
 		<mat-card-subtitle>Players: {{room?.users[0]}}{{room?.users.length == 2 ? " - " : ""}}{{room?.users[1]}}</mat-card-subtitle>
 	</mat-card-header>
 	<mat-card-content>
-		<app-game [game]="($currentGame | async)" [room]="room"></app-game>
+		<app-game [game]="currentGame" [room]="room"></app-game>
+
+		<div class="create-game" *ngIf="!currentGame || currentGame.isFinished()">
+			<div>
+				<mat-form-field>
+					<mat-label>Rounds</mat-label>
+					<input matInput type="number" placeholder="number of rounds" [(ngModel)]="roundsForNemGame" required>
+				</mat-form-field>
+			</div>
+			<button [disabled]="disabledCreateGame" (click)="createGame()" mat-raised-button color="primary">Start game</button>
+		</div>
 	</mat-card-content>
-	<mat-card-actions *ngIf="!($currentGame | async)">
-		<button [disabled]="disabledCreateGame" (click)="createGame()" mat-raised-button color="primary">Start game</button>
-	</mat-card-actions>
 </mat-card>

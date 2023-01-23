@@ -25,8 +25,8 @@
 			Game finished: {{gameResult()}}
 		</div>
 		<mat-list>
-			<mat-list-item *ngFor="let roundMoves of completedRounds; index as i;">
-				Round: {{completedRounds.length - i}}/{{game.rounds}}
+			<mat-list-item *ngFor="let roundMoves of game.completedRounds; index as i;">
+				Round: {{game.completedRounds.length - i}}/{{game.rounds}}
 				you: <div class="l-move" [ngClass]="userMoveClass(roundMoves)"></div>
 				opponent: <div class="l-move" [ngClass]="opponentMoveClass(roundMoves)"></div>
 				{{winner(roundMoves)}}
