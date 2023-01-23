@@ -1,11 +1,10 @@
 import { Injectable } from "@angular/core";
-import { filter, Observable } from "rxjs";
+import { filter, map, Observable } from "rxjs";
 import { Game, Move } from "../entities/game.entity";
 import { Message, WebSocketService } from "./websocket.service";
 
 const GAMES_MESSAGE_TYPE = "game"
 
-const CREATE_GAME_COMMAND = "createGame";
 const GET_GAME_COMMAND = "getGame";
 const PLAY_GAME_COMMAND = "playGame";
 
@@ -18,7 +17,14 @@ export class GamesService {
 
     observeGame(gameId: string): Observable<Message> {
         let observable: Observable<Message> = this.wsService.connectToResponseType(GAMES_MESSAGE_TYPE)
-            .pipe(filter(message => message.content?.game?._id == gameId));
+            .pipe(
+                filter(message => message.content?.game?._id == gameId),
+                map(message => {
+                    console.log("Create Game instance from data.")
+                    message.content.game = new Game(message.content.game);
+                    return message;
+                })
+            );
         
         this.wsService.send({
             type: GAMES_MESSAGE_TYPE,
