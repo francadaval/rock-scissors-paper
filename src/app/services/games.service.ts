@@ -1,12 +1,13 @@
 import { Injectable } from "@angular/core";
 import { filter, map, Observable } from "rxjs";
-import { Game, Move } from "../entities/game.entity";
+import { Game, GameData, Move } from "../entities/game.entity";
 import { Message, WebSocketService } from "./websocket.service";
 
 const GAMES_MESSAGE_TYPE = "game"
 
 const GET_GAME_COMMAND = "getGame";
 const PLAY_GAME_COMMAND = "playGame";
+const GET_PREVIOUS_ROOMS_COMMAND = "getRoomPreviousGames";
 
 @Injectable({
 	providedIn: 'root'
@@ -31,6 +32,24 @@ export class GamesService {
             content: {
                 command: GET_GAME_COMMAND,
                 gameId
+            }
+        })       
+
+        return observable;
+    }
+
+    public observePreviousGames(roomId: string): Observable<Message> {
+        let observable: Observable<Message> = this.wsService.connectToResponseType(GAMES_MESSAGE_TYPE)
+            .pipe(
+                filter(message => (message.content?.room?._id == roomId && message.content?.command == GET_PREVIOUS_ROOMS_COMMAND)),
+                map(message => message.content.previousGames = message.content.previousGames.filter((gameData: GameData) => new Game(gameData)))
+            );
+        
+        this.wsService.send({
+            type: GAMES_MESSAGE_TYPE,
+            content: {
+                command: GET_PREVIOUS_ROOMS_COMMAND,
+                roomId
             }
         })       
 

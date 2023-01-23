@@ -4,4 +4,5 @@ export interface Room {
     name: string;
 
     currentGameId: string;
+    previousGamesIds: string[];
 }
