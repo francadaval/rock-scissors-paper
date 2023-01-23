@@ -92,17 +92,23 @@ export class RoomsService extends AbstractService {
         }
 
         this.roomsRepository.save(room);
+        let user_rooms = await this.roomsRepository.findByUsername(username);
 
-        this.sendMessageToUsers(room.users, {room}, messageContent.command);
+        this.sendMessageToUsers(room.users, {user_rooms}, messageContent.command);
         this.broadcastFreeRoomsMsg();
     }
     
     protected async joinRoom(messageContent: any, username: string) {
         let room: Room = await this.roomsRepository.findOneById(messageContent.id);
-
+        
         if(room && room.users.length == 1) {
             room.users.push(username);
+            this.roomsRepository.save(room);
+
+            let user_rooms = await this.roomsRepository.findByUsername(username);
+
             this.sendMessageToUsers(room.users, {room}, messageContent.command);
+            this.sendMessageToUser(username, {user_rooms}, messageContent.command);
             this.broadcastFreeRoomsMsg();
         } else {
             this.sendErrorMessageToUser(messageContent.command, username);
@@ -122,7 +128,10 @@ export class RoomsService extends AbstractService {
             this.roomsRepository.save(room);
         }
 
+        let user_rooms = await this.roomsRepository.findByUsername(username);
+
         this.sendMessageToUsers(room.users, {room}, messageContent.command);
+        this.sendMessageToUser(username, {user_rooms}, messageContent.command);
         this.broadcastFreeRoomsMsg();
     }
 
@@ -141,6 +150,6 @@ export class RoomsService extends AbstractService {
 
     protected async broadcastFreeRoomsMsg() {
         let free_rooms = await this.roomsRepository.findFreeRooms();
-        this.broadcastMessage(free_rooms);
+        this.broadcastMessage({free_rooms});
     }
 }
