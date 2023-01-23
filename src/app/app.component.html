@@ -1,6 +1,9 @@
 <div class="parent">
 	<mat-toolbar role="heading" color="primary" class="div1">
 		<span>Rock - Paper - Scissors</span>
+		<button *ngIf="showLogout" mat-icon-button (click)="logout()">
+			<mat-icon color="accent">logout</mat-icon>
+		</button>
 	</mat-toolbar>
 
 	<div class="div2">

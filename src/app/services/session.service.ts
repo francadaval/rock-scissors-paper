@@ -78,6 +78,10 @@ export class SessionService {
 		}
 	}
 
+	public logout() {
+		this.setUserSession(null);
+	}
+
 	protected checkUserSession(): Promise<UserSession> {
 		let sessionId = localStorage.getItem( SESSION_ID )
 		if( !this._$userSession && sessionId ) {
