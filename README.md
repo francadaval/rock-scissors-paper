@@ -26,7 +26,7 @@ This project was generated with [Angular CLI](https://github.com/angular/angular
 * Run `npm install` to install project dependencies.
 * Run `npm build` to build server and frontend applications.
 * Run `npm start` to run server.
-* Open `http:\\localhost:3000` on browser to run application.
+* Open `http://localhost:3000` on browser to run application.
 
 ## Aplication 
 
