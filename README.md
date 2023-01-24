@@ -10,6 +10,8 @@ This project was generated with [Angular CLI](https://github.com/angular/angular
 ** Improve UI design and behaviour (UX).
 ** Improve responsiveness.
 ** Reconnection to websocket.
+** Input to set name of new rooms.
+** Add information of present users in lists of rooms.
 
 * BE improvements:
 ** Ends game once a player wins half plus one rounds.

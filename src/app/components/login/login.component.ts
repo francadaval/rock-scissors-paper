@@ -31,7 +31,7 @@ export class LoginComponent implements OnInit {
 		this.sessionService.$userSession.then( (userSession) => {
 			if( userSession ) {
 				console.log( "User on login screen, redirecting..." )
-				this.router.navigate(['/'])
+				this.router.navigate(['/']);
 			} else console.log( "No user on login screen." );
 		}).catch( () => {
 			console.log( "No user on login screen." )
